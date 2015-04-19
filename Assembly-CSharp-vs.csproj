@@ -48,6 +48,7 @@
   <ItemGroup>
      <Compile Include="Assets\Scripts\CanvasManager.cs" />
      <Compile Include="Assets\Scripts\Country.cs" />
+     <Compile Include="Assets\Scripts\CountryActionPanel.cs" />
      <Compile Include="Assets\Scripts\DebugPanel.cs" />
      <Compile Include="Assets\Scripts\GameAction.cs" />
      <Compile Include="Assets\Scripts\GameManger.cs" />

@@ -31,6 +31,6 @@ public class LeftPanel : MonoBehaviour, CountrySelectionEventListener {
 		}
 
 		countryNameLabel.text = currentDisplayCountry.name;
-		believerLabel.text = "Total Believers: " + (currentDisplayCountry.believerPercentage / 1000.0f).ToString() + " %";
+		believerLabel.text = "Followers: " + (currentDisplayCountry.believerPercentage / 1000.0f).ToString() + " %";
 	}
 }

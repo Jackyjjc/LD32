@@ -28,12 +28,18 @@ public class PlayerProfile : MonoBehaviour {
 
 	public InputField ideaNameText;
 	public InputField ideaDescriptionText;
+	public InputField ideaFounderText;
 
+	public string founderName;
 	public string ideaName;
 	public string ideaDescription;
 
     public void StartGame() {
-		if(ideaNameText.text.Length == 0 || ideaDescriptionText.text.Length == 0) {
+		if(ideaNameText.text.Length == 0 || ideaDescriptionText.text.Length == 0 || ideaFounderText.text.Length == 0) {
+			if(ideaFounderText.text.Length == 0) {
+				ideaFounderText.animator.SetTrigger("invalid");
+			}
+
 			if(ideaNameText.text.Length == 0) {
 				ideaNameText.animator.SetTrigger("invalid");
 			}
@@ -45,8 +51,10 @@ public class PlayerProfile : MonoBehaviour {
 			return;
 		}
 
+		this.founderName = ideaFounderText.text;
 		this.ideaName = ideaNameText.text;
 		this.ideaDescription = ideaDescriptionText.text;
+		this.ideaFounderText = null;
 		this.ideaNameText = null;
 		this.ideaDescriptionText = null;
 

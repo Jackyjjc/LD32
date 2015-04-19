@@ -27,6 +27,7 @@ public class GameManger : MonoBehaviour {
 	private static float medium = 1/10.0f;
 	private static float high = 1/20.0f;
 
+	private bool started = false;
 	private bool paused = false;
 	private float tickFrequency = normal;
 	private float timeElapsedSinceLastTick = 0;
@@ -95,9 +96,18 @@ public class GameManger : MonoBehaviour {
 		foreach(var action in gameActions) {
 			possibleActions[action.actionName] = action;
 		}
+
+		GameObject introTextObj = GameObject.FindGameObjectWithTag("IntroText");
+		Text intro = introTextObj.GetComponent<Text>();
+		intro.text = string.Format(intro.text, PlayerProfile.instance.founderName, PlayerProfile.instance.ideaName);
 	}
 
-	public void AddCountryAction(string action) {
+	public void StartGame() {
+		GameObject.FindGameObjectWithTag("IntroPanel").SetActive(false);
+		started = true;
+	}
+
+	public void InitiateCountryAction(string action) {
 		Debug.Log("User initiated action: " + action);
 		Country selectedCountry = worldMap.currentSelectedCountry;
 		if(selectedCountry == null) {
@@ -122,7 +132,7 @@ public class GameManger : MonoBehaviour {
 	}
 
 	void Update () {
-		if(paused) {
+		if(!started || paused) {
 			return;
 		}
 
