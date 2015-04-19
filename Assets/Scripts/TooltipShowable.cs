@@ -6,6 +6,7 @@ using System.Collections;
 public class TooltipShowable : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
 
 	public string message;
+	public int xModifier = 0;
 	private GameObject tooltip;
 
 	void Start() {
@@ -15,7 +16,7 @@ public class TooltipShowable : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
 	public void ShowToolTip(Vector3 position, string content) {
 		tooltip.SetActive(true);
-		tooltip.transform.position = new Vector3(position.x + 12, position.y - 10, position.z);
+		tooltip.transform.position = new Vector3(position.x + 12 + xModifier, position.y - 10, position.z);
 		(tooltip.GetComponentInChildren<Text>() as Text).text = content;
 	}
 	

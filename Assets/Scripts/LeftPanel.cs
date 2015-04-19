@@ -8,6 +8,7 @@ public class LeftPanel : MonoBehaviour, CountrySelectionEventListener {
 
 	public Text countryNameLabel;
 	public Text believerLabel;
+	public Text governmentAwarenessLabel;
 
 	public void SelectCountry(Country info) {
 		Debug.Log("Left Panel displaying info");
@@ -32,5 +33,6 @@ public class LeftPanel : MonoBehaviour, CountrySelectionEventListener {
 
 		countryNameLabel.text = currentDisplayCountry.name;
 		believerLabel.text = "Followers: " + (currentDisplayCountry.believerPercentage / 1000.0f).ToString() + " %";
+		governmentAwarenessLabel.text = "Gov. Awareness: " + currentDisplayCountry.governmentAwareness + " / 100";
 	}
 }

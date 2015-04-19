@@ -35,6 +35,7 @@ public enum Demography {
 public class Country {
 	public readonly string name;
 	public int believerPercentage;
+	public int governmentAwareness = 0;
 	private float conversionRate = 0;
 	private List<Effect> effects;
 
@@ -82,10 +83,16 @@ public class Country {
 
 		effects.Add(effect);
 		this.conversionRate = CalculateConversionRate();
+
+		float n = effect.action.baseRate * 1000;
+		float newBase = 10000 / n;
+		newBase = (float)Math.Max(newBase, 1.001);
+		governmentAwareness += (int)Mathf.Log(n, newBase);
+		governmentAwareness = Math.Min(governmentAwareness, 100);
 	}
 
 	public float CalculateConversionRate() {
-		float conversionRate = -0.005f;
+		float conversionRate = -0.001f;
 		foreach(var e in effects) {
 			conversionRate += e.action.baseRate;
 		}

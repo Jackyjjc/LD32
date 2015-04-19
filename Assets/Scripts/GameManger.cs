@@ -77,29 +77,48 @@ public class GameManger : MonoBehaviour {
 	private DateTime currentDate;
 	private WorldMap worldMap;
 
-	public Dictionary<string, GameAction> possibleActions;
+	public GameObject actionButtonPrefab;
+	public GameObject actionPanel;
 	private delegate void Action(DateTime currentDate);
 	private LinkedList<Action> actions;
 
+	void SetUpGameActions ()
+	{
+		GameAction[] gameActions = new GameAction[] {
+			new GameAction ("Word Of Mouth", 1, new TimeSpan (30, 0, 0, 0), 0.01f),
+			new GameAction ("Publish Books", 3, new TimeSpan (90, 0, 0, 0), 0.015f),
+			new GameAction ("Social Media", 2, new TimeSpan (8, 0, 0, 0), 0.8f),
+			new GameAction ("TV Shows", 5, new TimeSpan (20, 0, 0, 0), 0.4f),
+			new GameAction ("Public Speech", 4, new TimeSpan (16, 0, 0, 0), 0.3f),
+			new GameAction ("National Tour", 10, new TimeSpan (60, 0, 0, 0), 0.5f, "\nRequire: 1 Celebrity"),
+			new GameAction ("Political Party", 15, new TimeSpan(365, 0, 0, 0), 0.01f, "\nRequire: 1 Political Leader"),
+			new GameAction ("Revolution", 20, new TimeSpan(10, 0, 0, 0), 5f, "\nRequire: 2 Leader of any kind"),
+			new GameAction ("Coup d'état", 30, new TimeSpan(2, 0, 0, 0), 50f, "\nRequire: 1 Political Leader + 1 Military Leader")
+		};
+		foreach (var action in gameActions) {
+			var copyAction = action;
+			GameObject button = Instantiate (actionButtonPrefab, Vector3.zero, Quaternion.identity) as GameObject;
+			button.GetComponent<Button>().onClick.AddListener(() => this.InitiateCountryAction (copyAction));
+			button.GetComponent<TooltipShowable>().message = copyAction.description;
+			button.GetComponentInChildren<Text>().text = copyAction.actionName;
+			button.transform.SetParent(actionPanel.transform);
+		}
+	}
+
 	void Start () {
 		currentDate = new DateTime(2015, 4, 18);
-		influencePoint = 5;
+		influencePoint = 100;
 		this.worldMap = GameObject.FindGameObjectWithTag("worldMap").GetComponent<WorldMap>();
 		this.actions = new LinkedList<Action>();
 
-		GameAction[] gameActions = new GameAction[] {
-			new GameAction("WordOfMouth", 1, new TimeSpan(1, 0, 0, 0), 1f),
-			new GameAction("BookPrinting", 2, new TimeSpan(365, 0, 0, 0), 0.02f)
-		};
-
-		possibleActions = new Dictionary<string, GameAction>();
-		foreach(var action in gameActions) {
-			possibleActions[action.actionName] = action;
-		}
-
 		GameObject introTextObj = GameObject.FindGameObjectWithTag("IntroText");
 		Text intro = introTextObj.GetComponent<Text>();
-		intro.text = string.Format(intro.text, PlayerProfile.instance.founderName, PlayerProfile.instance.ideaName);
+
+		if(PlayerProfile.instance != null) {
+			intro.text = string.Format(intro.text, PlayerProfile.instance.founderName, PlayerProfile.instance.ideaName);
+		}
+
+		SetUpGameActions();
 	}
 
 	public void StartGame() {
@@ -107,25 +126,23 @@ public class GameManger : MonoBehaviour {
 		started = true;
 	}
 
-	public void InitiateCountryAction(string action) {
-		Debug.Log("User initiated action: " + action);
+	public void InitiateCountryAction(GameAction gameAction) {
+		Debug.Log("User initiated action: " + gameAction.actionName);
 		Country selectedCountry = worldMap.currentSelectedCountry;
 		if(selectedCountry == null) {
 			Debug.Log("Cannot perform action because no country is selected");
 			return;
 		}
 
-		GameAction gameAction = possibleActions[action];
-
 		int actionCost = selectedCountry.GetActionCost(gameAction);
 		if(actionCost > influencePoint) {
 			//TODO: NOTIFY user
-			Debug.Log("Insufficient influence point to perform action: " + action + " in country: " + selectedCountry.name);
+			Debug.Log("Insufficient influence point to perform action: " + gameAction.actionName + " in country: " + selectedCountry.name);
 			return;
 		}
 
 		actions.AddLast(delegate(DateTime date) {
-			Debug.Log("Action " + action + " is picked up in the queue");
+			Debug.Log("Action " + gameAction.actionName + " is picked up in the queue");
 			influencePoint -= actionCost;
 			selectedCountry.AddEffect(new Effect(gameAction, date.Add(gameAction.baseDuration)));
 		});
