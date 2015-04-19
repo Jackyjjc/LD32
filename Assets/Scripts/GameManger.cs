@@ -10,7 +10,6 @@ public interface CountrySelectionEventListener {
 }
 
 public class GameManger : MonoBehaviour {
-
 	// Singleton
 	public static GameManger instance;
 	void Awake()
@@ -111,14 +110,14 @@ public class GameManger : MonoBehaviour {
 		this.worldMap = GameObject.FindGameObjectWithTag("worldMap").GetComponent<WorldMap>();
 		this.actions = new LinkedList<Action>();
 
-		GameObject introTextObj = GameObject.FindGameObjectWithTag("IntroText");
-		Text intro = introTextObj.GetComponent<Text>();
-
 		if(PlayerProfile.instance != null) {
+			GameObject introTextObj = GameObject.FindGameObjectWithTag("IntroText");
+			Text intro = introTextObj.GetComponent<Text>();
 			intro.text = string.Format(intro.text, PlayerProfile.instance.founderName, PlayerProfile.instance.ideaName);
 		}
 
 		SetUpGameActions();
+		this.messages = new List<GameMessage>();
 	}
 
 	public void StartGame() {
@@ -127,24 +126,25 @@ public class GameManger : MonoBehaviour {
 	}
 
 	public void InitiateCountryAction(GameAction gameAction) {
-		Debug.Log("User initiated action: " + gameAction.actionName);
 		Country selectedCountry = worldMap.currentSelectedCountry;
 		if(selectedCountry == null) {
-			Debug.Log("Cannot perform action because no country is selected");
+			PostMessageToBoard("Cannot perform action because no country is selected", Color.red);
 			return;
 		}
 
 		int actionCost = selectedCountry.GetActionCost(gameAction);
 		if(actionCost > influencePoint) {
 			//TODO: NOTIFY user
-			Debug.Log("Insufficient influence point to perform action: " + gameAction.actionName + " in country: " + selectedCountry.name);
+			PostMessageToBoard("Insufficient influence point to perform action: " + gameAction.actionName + " in country: " + selectedCountry.name, Color.red);
 			return;
 		}
+
+		PostMessageToBoardWithTime("You performed action: " + gameAction.actionName);
 
 		actions.AddLast(delegate(DateTime date) {
 			Debug.Log("Action " + gameAction.actionName + " is picked up in the queue");
 			influencePoint -= actionCost;
-			selectedCountry.AddEffect(new Effect(gameAction, date.Add(gameAction.baseDuration)));
+			selectedCountry.AddEffect(new Effect(gameAction.actionName, gameAction.baseRate, date.Add(gameAction.baseDuration)));
 		});
 	}
 
@@ -164,11 +164,55 @@ public class GameManger : MonoBehaviour {
 
 	void GameUpdate() {
 		currentDate = currentDate.AddDays(1);
+
+		//Clean up message queue
+		List<GameMessage> messagesToRemove = messages.FindAll(x => (currentDate - x.creationDate).TotalDays > 30);
+		messages.RemoveAll(x => messagesToRemove.Contains(x));
+		foreach(var m in messagesToRemove) {
+			m.messageObj.transform.SetParent(null);
+			Destroy(m.messageObj);
+		}
+
+		//Perform Actions
 		foreach(var action in actions) {
 			action(currentDate);
 		}
 		actions.Clear();
 
 		worldMap.GameUpdate(currentDate);
+	}
+
+	private struct GameMessage {
+		public DateTime creationDate;
+		public GameObject messageObj;
+	}
+	private List<GameMessage> messages;
+	public GameObject messageBoard;
+	public GameObject messageBoardMessagePrefab;
+
+	public GameObject PostMessageToBoard(string message) {
+		GameObject messageObj = Instantiate(messageBoardMessagePrefab, Vector3.zero, Quaternion.identity) as GameObject;
+		Text textComponent = messageObj.GetComponent<Text>();
+		textComponent.text = message;
+		messageObj.transform.SetParent(messageBoard.transform);
+	
+		GameMessage gameMessage = new GameMessage();
+		gameMessage.creationDate = currentDate;
+		gameMessage.messageObj = messageObj;
+		messages.Add(gameMessage);
+
+		return messageObj;
+	}
+
+	public void PostMessageToBoardWithTime(string message) {
+		PostMessageToBoard(currentDate.ToString("dd, MMM, yyyy") + " : " + message);
+	}
+
+	public void PostMessageToBoardWithTime(string message, Color color) {
+		PostMessageToBoard(currentDate.ToString("dd, MMM, yyyy") + " : " + message, color);
+	}
+
+	public void PostMessageToBoard(string message, Color color) {
+		PostMessageToBoard(message).GetComponent<Text>().color = color;
 	}
 }

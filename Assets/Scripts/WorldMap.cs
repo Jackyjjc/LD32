@@ -76,6 +76,7 @@ public class WorldMap : MonoBehaviour {
 	}
 
 	private void DeselectCountry() {
+		currentSelectedCountry = null;
 		GameManger.instance.NotifySelectCountry(null);
 	}
 }
