@@ -22,7 +22,14 @@ public class WorldMap : MonoBehaviour {
 			new Country("Mongolia"),
 			new Country("China"),
 			new Country("India"),
-			new Country("SoutheastAsia")
+			new Country("SoutheastAsia"),
+			new Country("Europe"),
+			new Country("ANZ"),
+			new Country("EastAsia"),
+			new Country("Africa"),
+			new Country("Greenland"),
+			new Country("NorthAmerica"),
+			new Country("SouthAmerica")
 		};
 		
 		this.countryTable = new Dictionary<string, Country>();
