@@ -4,13 +4,12 @@ using System.Collections;
 
 public class LeftPanel : MonoBehaviour, CountrySelectionEventListener {
 
-	private CountryInfo currentDisplayCountry;
+	private Country currentDisplayCountry;
 
 	public Text countryNameLabel;
-	public Text populationLabel;
 	public Text believerLabel;
 
-	public void SelectCountry(CountryInfo info) {
+	public void SelectCountry(Country info) {
 		Debug.Log("Left Panel displaying info");
 		this.currentDisplayCountry = info;
 	}
@@ -27,13 +26,11 @@ public class LeftPanel : MonoBehaviour, CountrySelectionEventListener {
 	void Update() {
 		if(currentDisplayCountry == null) {
 			countryNameLabel.text = "No Country is selected";
-			populationLabel.text = "";
 			believerLabel.text = "";
 			return;
 		}
 
-		countryNameLabel.text = "Country Name: " + currentDisplayCountry.name;
-		populationLabel.text = "Total Population: " + currentDisplayCountry.population.ToString();
-		believerLabel.text = "Total Believers: " + currentDisplayCountry.numBelievers.ToString();
+		countryNameLabel.text = currentDisplayCountry.name;
+		believerLabel.text = "Total Believers: " + (currentDisplayCountry.believerPercentage / 1000.0f).ToString() + " %";
 	}
 }
