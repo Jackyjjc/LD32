@@ -18,7 +18,7 @@ public class PlayerProfile : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-	
+		tooltip = GameObject.FindGameObjectWithTag("tooltip");
 	}
 	
 	// Update is called once per frame

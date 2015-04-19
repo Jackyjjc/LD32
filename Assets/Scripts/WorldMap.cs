@@ -38,7 +38,7 @@ public class WorldMap : MonoBehaviour {
 		});
 
 		this.countries = new Country[] {
-			new Country("Russia", choose<CountryTrait>(traits, 5)),
+			new Country("Russia", choose<CountryTrait>(traits,UnityEngine.Random.Range(1, traits.Count / 2))),
 			new Country("MiddleEast", choose<CountryTrait>(traits, UnityEngine.Random.Range(1, traits.Count / 2))),
 			new Country("Mongolia", choose<CountryTrait>(traits, UnityEngine.Random.Range(1, traits.Count / 2))),
 			new Country("China", choose<CountryTrait>(traits, UnityEngine.Random.Range(1, traits.Count / 2))),
@@ -113,7 +113,7 @@ public class WorldMap : MonoBehaviour {
 	}
 
 	public bool isFullControl() {
-		return globalPer ==  countries.Length * Country.hundredPer;
+		return globalPer >= countries.Length * Country.hundredPer;
 	}
 
 	public List<T> choose<T>(List<T> list, int n) {

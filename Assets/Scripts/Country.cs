@@ -7,11 +7,13 @@ public class Effect {
 	public string name;
 	public float modifier;
 	public int resistenceModifier;
+	public DateTime startDate;
 	public DateTime endDate;
 
-	public Effect(string name, float modifier, DateTime endDate, int resistenceModifier = 0) {
+	public Effect(string name, float modifier, DateTime startDate, DateTime endDate, int resistenceModifier = 0) {
 		this.name = name;
 		this.modifier = modifier;
+		this.startDate = startDate;
 		this.endDate = endDate;
 		this.resistenceModifier = resistenceModifier;
 	}
@@ -40,8 +42,15 @@ public class Country {
 		this.traits = traits;
 	}
 
+	private DateTime nextDropped;
+
 	public void Update(DateTime currentDate) {
 		effects.RemoveAll((e) => e.endDate <= currentDate);
+
+		if(!effects.Exists(e => (e.startDate - currentDate).TotalDays < 30) && (nextDropped == null || nextDropped <= currentDate)) {
+			resistence = Math.Max(0, resistence - 1);
+			nextDropped = currentDate + new TimeSpan(UnityEngine.Random.Range(60, 120), 0, 0, 0);
+		}
 
 		if(believerPercentage < hundredPer) {
 			if(nextResistenceCheck == null) {
@@ -130,43 +139,43 @@ public class Country {
 		level = Math.Min (Math.Max(0, level), 100);
 		if (level >= 0 && level < 10) {
 			suddenDrop = 0.5f;
-			AddEffect(new Effect(string.Format("Internet War"), -0.03f, currentDate + new TimeSpan(10, 0, 0, 0)));
+			AddEffect(new Effect(string.Format("Internet War"), -0.03f, currentDate, currentDate + new TimeSpan(10, 0, 0, 0)));
 			GameManger.instance.PostMessageToBoardWithTime(
 				string.Format("Some people on the Internet start attacking followers of {0}", PlayerProfile.instance.ideaName), Color.yellow
 			);
 		} else if (level >= 10 && level < 20) {
 			suddenDrop = 0.7f;
-			AddEffect(new Effect(string.Format("Open Criticism"), -0.05f, currentDate + new TimeSpan(20, 0, 0, 0)));
+			AddEffect(new Effect(string.Format("Open Criticism"), -0.05f, currentDate, currentDate + new TimeSpan(20, 0, 0, 0)));
 			GameManger.instance.PostMessageToBoardWithTime(
 				string.Format("Some people in {0} openly criticized {1}", name, PlayerProfile.instance.ideaName), Color.yellow
 			);
 		} else if (level >= 20 && level < 30) {
 			suddenDrop = 0.9f;
-			AddEffect(new Effect(string.Format("Media Criticism"), -0.07f, currentDate + new TimeSpan(35, 0, 0, 0)));
+			AddEffect(new Effect(string.Format("Media Criticism"), -0.07f, currentDate, currentDate + new TimeSpan(35, 0, 0, 0)));
 			GameManger.instance.PostMessageToBoardWithTime(
 				string.Format("Public media in {0} openly criticized {1}", name, PlayerProfile.instance.ideaName), Color.yellow
 			);
 		} else if (level >= 30 && level < 40) {
 			suddenDrop = 1f;
-			AddEffect(new Effect(string.Format("Government Warning"), -0.1f, currentDate + new TimeSpan(70, 0, 0, 0)));
+			AddEffect(new Effect(string.Format("Government Warning"), -0.1f, currentDate, currentDate + new TimeSpan(70, 0, 0, 0)));
 			GameManger.instance.PostMessageToBoardWithTime(
 				string.Format("Some government officials in {0} warn the public about {1}", name, PlayerProfile.instance.ideaName), Color.yellow
 			);
 		} else if (level >= 40 && level < 50) {
 			suddenDrop = 2f;
-			AddEffect(new Effect(string.Format("Protests"), -0.3f, currentDate + new TimeSpan(20, 0, 0, 0)));
+			AddEffect(new Effect(string.Format("Protests"), -0.3f, currentDate, currentDate + new TimeSpan(20, 0, 0, 0)));
 			GameManger.instance.PostMessageToBoardWithTime(
 				string.Format("There are public protests against {0} in {1}", PlayerProfile.instance.ideaName, name), Color.yellow
 			);
 		} else if (level >= 50 && level < 60) {
 			suddenDrop = 5f;
-			AddEffect(new Effect(string.Format("Setarian violence"), -0.4f, currentDate + new TimeSpan(10, 0, 0, 0)));
+			AddEffect(new Effect(string.Format("Setarian violence"), -0.4f, currentDate, currentDate + new TimeSpan(10, 0, 0, 0)));
 			GameManger.instance.PostMessageToBoardWithTime(
 				string.Format("Violence outbreak between supporter of {0} and its oppositions in {1}", PlayerProfile.instance.ideaName, name), Color.yellow
 			);
 		} else if (level >= 60 && level < 70) {
 			suddenDrop = 1f;
-			AddEffect(new Effect(string.Format("Fear"), -0.1f, currentDate + new TimeSpan(90, 0, 0, 0)));
+			AddEffect(new Effect(string.Format("Fear"), -0.08f, currentDate, currentDate + new TimeSpan(70, 0, 0, 0)));
 			GameManger.instance.PostMessageToBoardWithTime(
 				string.Format("People in {0} are reluctant to follow {1} because of recent developments", name, PlayerProfile.instance.ideaName), Color.yellow
 				);
@@ -175,7 +184,7 @@ public class Country {
 				return;
 			}
 			suddenDrop = 1f;
-			AddEffect(new Effect(string.Format("Restrict Access"), -0.1f, currentDate + new TimeSpan(90, 0, 0, 0) + (traits.Exists(x => x.name.Equals("Dictatorial")) ? new TimeSpan(30 , 0, 0, 0) : new TimeSpan(0 , 0, 0, 0))));
+			AddEffect(new Effect(string.Format("Restrict Access"), -0.1f, currentDate, currentDate + new TimeSpan(40, 0, 0, 0) + (traits.Exists(x => x.name.Equals("Dictatorial")) ? new TimeSpan(30 , 0, 0, 0) : new TimeSpan(0 , 0, 0, 0))));
 			GameManger.instance.PostMessageToBoardWithTime(
 				string.Format("Access to materials about {0} are becoming increasingly hard in {1}", PlayerProfile.instance.ideaName, name), Color.yellow
 			);
@@ -183,14 +192,14 @@ public class Country {
 			if(traits.Exists(x => x.name.Equals("Freedom"))) {
 				return;
 			}
-			suddenDrop = 5f;
-			AddEffect(new Effect(string.Format("Restrict Speech"), -1f, currentDate + new TimeSpan(365, 0, 0, 0)+ (traits.Exists(x => x.name.Equals("Dictatorial")) ? new TimeSpan(30 , 0, 0, 0) : new TimeSpan(0 , 0, 0, 0))));
+			suddenDrop = 3f;
+			AddEffect(new Effect(string.Format("Restrict Speech"), -0.4f, currentDate, currentDate + new TimeSpan(20, 0, 0, 0)+ (traits.Exists(x => x.name.Equals("Dictatorial")) ? new TimeSpan(30 , 0, 0, 0) : new TimeSpan(0 , 0, 0, 0))));
 			GameManger.instance.PostMessageToBoardWithTime(
 				string.Format("The government of {0} bans all discussions about {1}", name, PlayerProfile.instance.ideaName), Color.yellow
 			);
 		} else {
-			suddenDrop = 10f;
-			AddEffect(new Effect(string.Format("Arrestment"), -0.5f, currentDate + new TimeSpan(180, 0, 0, 0)));
+			suddenDrop = 5f;
+			AddEffect(new Effect(string.Format("Arrestment"), -1f, currentDate, currentDate + new TimeSpan(10, 0, 0, 0)));
 			GameManger.instance.PostMessageToBoardWithTime(
 				string.Format("Police start arresting followers of {0} in {1}", PlayerProfile.instance.ideaName, name), Color.yellow
 			);

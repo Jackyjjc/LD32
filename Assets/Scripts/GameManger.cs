@@ -85,15 +85,15 @@ public class GameManger : MonoBehaviour {
 	void SetUpGameActions ()
 	{
 		GameAction[] gameActions = new GameAction[] {
-			new GameAction ("Word Of Mouth", 1, new TimeSpan (30, 0, 0, 0), 0.01f, 1),
-			new GameAction ("Publish Books", 3, new TimeSpan (90, 0, 0, 0), 0.015f, 1),
-			new GameAction ("Social Media", 2, new TimeSpan (8, 0, 0, 0), 0.8f, 2),
-			new GameAction ("TV Shows", 5, new TimeSpan (20, 0, 0, 0), 0.4f, 2),
-			new GameAction ("Public Speech", 4, new TimeSpan (16, 0, 0, 0), 0.3f, 5),
-			new GameAction ("National Tour", 10, new TimeSpan (60, 0, 0, 0), 0.5f, 10),
-			new GameAction ("Political Party", 15, new TimeSpan(365, 0, 0, 0), 0.01f, 15),
-			new GameAction ("Revolution", 20, new TimeSpan(10, 0, 0, 0), 5f, 50),
-			new GameAction ("Coup d'état", 30, new TimeSpan(2, 0, 0, 0), 50f, 90)
+			new GameAction ("Word Of Mouth", 1, new TimeSpan (30, 0, 0, 0), 0.1f, 1),
+			new GameAction ("Publish Books", 3, new TimeSpan (60, 0, 0, 0), 0.2f, 3),
+			new GameAction ("Social Media", 2, new TimeSpan (8, 0, 0, 0), 0.9f, 3),
+			new GameAction ("TV Shows", 5, new TimeSpan (20, 0, 0, 0), 0.4f, 4),
+			new GameAction ("Public Speech", 8, new TimeSpan (16, 0, 0, 0), 0.5f, 9),
+			new GameAction ("National Tour", 10, new TimeSpan (40, 0, 0, 0), 0.5f, 20),
+			new GameAction ("Political Party", 30, new TimeSpan(120, 0, 0, 0), 0.3f, 30),
+			new GameAction ("Revolution", 40, new TimeSpan(10, 0, 0, 0), 1f, 50),
+			new GameAction ("Coup d'état", 60, new TimeSpan(2, 0, 0, 0), 10f, 90)
 		};
 		foreach (var action in gameActions) {
 			var copyAction = action;
@@ -162,7 +162,7 @@ public class GameManger : MonoBehaviour {
 		actions.AddLast(delegate(DateTime date) {
 			Debug.Log("Action " + gameAction.actionName + " is picked up in the queue");
 			influencePoint -= actionCost;
-			selectedCountry.AddEffect(new Effect(gameAction.actionName, gameAction.baseRate, date.Add(gameAction.baseDuration + bonusDuration), gameAction.resistenceModifier));
+			selectedCountry.AddEffect(new Effect(gameAction.actionName, gameAction.baseRate, currentDate, date.Add(gameAction.baseDuration + bonusDuration), gameAction.resistenceModifier));
 		});
 	}
 
