@@ -11,12 +11,10 @@ public class LeftPanel : MonoBehaviour, CountrySelectionEventListener {
 	public Text resistenceLabel;
 
 	public void SelectCountry(Country info) {
-		Debug.Log("Left Panel displaying info");
 		this.currentDisplayCountry = info;
 	}
 
 	public void DeselectCountry() {
-		Debug.Log("Left Panel stop displaying info");
 		this.currentDisplayCountry = null;
 	}
 

@@ -39,7 +39,7 @@ public class Country {
 	}
 
 	public void Update(DateTime currentDate) {
-		int numRemoved = effects.RemoveAll((e) => e.endDate <= currentDate);
+		effects.RemoveAll((e) => e.endDate <= currentDate);
 
 		if(believerPercentage < hundredPer) {
 			if(nextResistenceCheck == null) {
@@ -75,9 +75,6 @@ public class Country {
 	}
 
 	public void AddEffect(Effect effect) {
-		Debug.Log("effect: " + effect.name + " is added to the country: " + name);
-
-		Debug.Log("Finding Effect " + effect.name);
 		Effect e = FindEffect(effect.name);
 		if(e != null) {
 			effects.Remove(e);

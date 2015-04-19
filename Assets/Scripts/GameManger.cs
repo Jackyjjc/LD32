@@ -126,6 +126,10 @@ public class GameManger : MonoBehaviour {
 		started = true;
 	}
 
+	public void RestartGame() {
+		Application.LoadLevel("start");
+	}
+
 	public void InitiateCountryAction(GameAction gameAction) {
 		Country selectedCountry = worldMap.currentSelectedCountry;
 		if(selectedCountry == null) {
@@ -148,8 +152,22 @@ public class GameManger : MonoBehaviour {
 		});
 	}
 
+	public GameObject finalScreen;
+
 	void Update () {
-		if(!started || paused) {
+		if(!started) {
+			return;
+		}
+
+		if(worldMap.isFullControl()) {
+			finalScreen.SetActive(true);
+			finalScreen.GetComponentInChildren<Text>().text = "Congratulations! You have win the game!";
+		} else if (worldMap.isZeroControl() && influencePoint == 0) {
+			finalScreen.SetActive(true);
+			finalScreen.GetComponentInChildren<Text>().text = "Sorry! You have lost the game!";
+		}
+
+		if(paused) {
 			return;
 		}
 

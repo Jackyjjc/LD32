@@ -61,6 +61,7 @@ public class WorldMap : MonoBehaviour {
 		foreach(var c in countries) {
 			globalPercentage += c.believerPercentage;
 		}
+		globalPercentage = Math.Min(globalPercentage, countries.Length * Country.hundredPer);
 		this.globalPer = (((float)globalPercentage / countries.Length) / Country.accuracy);
 		globalBelieverPercentageText.text = globalPer.ToString("0.00") + "%";
 
@@ -70,14 +71,12 @@ public class WorldMap : MonoBehaviour {
 	}
 
 	private void SelectCountry(string countryName) {
-		Debug.Log("selecting coutry " + countryName);
 		
 		if(!countryTable.ContainsKey(countryName)) {
 			Debug.LogError("User selected invalid country " + countryName);
 		}
 		
 		Country country = countryTable[countryName];
-		Debug.Log("Tell left panel to display country info" + country);
 		currentSelectedCountry = country;
 
 		GameManger.instance.NotifySelectCountry(country);
@@ -86,5 +85,13 @@ public class WorldMap : MonoBehaviour {
 	private void DeselectCountry() {
 		currentSelectedCountry = null;
 		GameManger.instance.NotifySelectCountry(null);
+	}
+
+	public bool isZeroControl() {
+		return globalPer == 0;
+	}
+
+	public bool isFullControl() {
+		return globalPer ==  countries.Length * Country.hundredPer;
 	}
 }
