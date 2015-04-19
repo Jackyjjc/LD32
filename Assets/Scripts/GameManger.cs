@@ -105,9 +105,11 @@ public class GameManger : MonoBehaviour {
 		}
 	}
 
+	public static readonly int startingPoints = 20;
+
 	void Start () {
 		currentDate = new DateTime(2015, 4, 18);
-		influencePoint = 10;
+		influencePoint = startingPoints;
 		this.worldMap = GameObject.FindGameObjectWithTag("worldMap").GetComponent<WorldMap>();
 		this.actions = new LinkedList<Action>();
 
