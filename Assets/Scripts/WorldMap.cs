@@ -7,6 +7,7 @@ using System.Collections.Generic;
 public class WorldMap : MonoBehaviour {
 
 	public Text globalBelieverPercentageText;
+	public float globalPer;
 	private GameObject globalProgressBar;
 	
 	public Country currentSelectedCountry;
@@ -53,7 +54,7 @@ public class WorldMap : MonoBehaviour {
 		foreach(var c in countries) {
 			globalPercentage += c.believerPercentage;
 		}
-		float globalPer = (((float)globalPercentage / countries.Length) / 1000f);
+		this.globalPer = (((float)globalPercentage / countries.Length) / Country.accuracy);
 		globalBelieverPercentageText.text = globalPer.ToString("0.00") + "%";
 
 		//update the progress bar as well

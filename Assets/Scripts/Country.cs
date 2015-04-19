@@ -6,11 +6,14 @@ using System;
 public class Effect {
 	public string name;
 	public float modifier;
+	public int resistenceModifier;
 	public DateTime endDate;
-	public Effect(string name, float modifier, DateTime endDate) {
+
+	public Effect(string name, float modifier, DateTime endDate, int resistenceModifier = 0) {
 		this.name = name;
 		this.modifier = modifier;
 		this.endDate = endDate;
+		this.resistenceModifier = resistenceModifier;
 	}
 
 	public override string ToString ()
@@ -20,9 +23,13 @@ public class Effect {
 }
 
 public class Country {
+	public static readonly int accuracy = 1000;
+	public static readonly int hundredPer = 100 * accuracy;
+
 	public readonly string name;
 	public int believerPercentage;
 	public int resistence = 0;
+	private DateTime nextResistenceCheck;
 	private List<Effect> effects;
 
 	public Country(string name) {
@@ -34,16 +41,22 @@ public class Country {
 	public void Update(DateTime currentDate) {
 		int numRemoved = effects.RemoveAll((e) => e.endDate <= currentDate);
 
-		if(believerPercentage < 1000000 && currentDate.Day == 1 && !effects.Exists(x => x.modifier < 0)) {
-			float supressionValue = UnityEngine.Random.Range(0f, 100f);
-			if(supressionValue < resistence) {
-				//thing happened.
-				GenerateResistentEvent(currentDate);
+		if(believerPercentage < hundredPer) {
+			if(nextResistenceCheck == null) {
+				nextResistenceCheck = currentDate;
+			}
+
+			if(nextResistenceCheck <= currentDate) {
+				float supressionValue = UnityEngine.Random.Range(0f, 100f);
+				if(supressionValue < resistence) {
+					GenerateResistentEvent(currentDate);
+				}
+				nextResistenceCheck = currentDate + new TimeSpan(UnityEngine.Random.Range(30, 60 + (effects.Exists(x => x.modifier < 0) ? 30 : 0)), 0, 0, 0);
 			}
 		}
 
 		float conversionRate = CalculateConversionRate();
-		if((conversionRate - 0 < float.Epsilon) || believerPercentage >= 100000) {
+		if(believerPercentage >= hundredPer) {
 			return;
 		}
 
@@ -52,9 +65,9 @@ public class Country {
 	}
 
 	public void ChangeFollowerBy(float conversionRate) {
-		int numConverted = (int)(conversionRate * 1000);
+		int numConverted = (int)(conversionRate * accuracy);
 		believerPercentage += numConverted;
-		believerPercentage = Math.Min(Math.Max(believerPercentage, 0), 100000);
+		believerPercentage = Math.Min(Math.Max(believerPercentage, 0), hundredPer);
 	}
 
 	public List<Effect> GetEffects() {
@@ -71,19 +84,11 @@ public class Country {
 		}
 
 		effects.Add(effect);
-
-		//TODO revise this
-		if(effect.modifier > 0) {
-			float n = effect.modifier * 1000;
-			float newBase = 10000 / n;
-			newBase = (float)Math.Max(newBase, 1.001);
-			resistence += (int)Mathf.Log(n, newBase);
-			resistence = Math.Min(resistence, 100);
-		}
+		resistence = Math.Min(resistence + effect.resistenceModifier, 100);
 	}
 
 	public float CalculateConversionRate() {
-		float conversionRate = -0.001f;
+		float conversionRate = - Mathf.Max((resistence / 1000.0f), 0.001f);
 		foreach(var e in effects) {
 			conversionRate += e.modifier;
 		}
@@ -171,7 +176,7 @@ public class Country {
 		}
 
 		ChangeFollowerBy(-suddenDrop);
-		GameManger.instance.PostMessageToBoardWithTime(string.Format("Followers in {0} decreased by {1}", name, suddenDrop), Color.yellow);
+		GameManger.instance.PostMessageToBoardWithTime(string.Format("Followers in {0} decreased by {1}% ", name, suddenDrop), Color.yellow);
 	}
 
 	private float GenerateRandomVar(float mean, float stdDev) {

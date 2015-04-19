@@ -32,7 +32,8 @@ public class LeftPanel : MonoBehaviour, CountrySelectionEventListener {
 		}
 
 		countryNameLabel.text = currentDisplayCountry.name;
-		believerLabel.text = "Followers: " + (currentDisplayCountry.believerPercentage / 1000.0f).ToString() + " %";
+		believerLabel.text = "Followers: " + (currentDisplayCountry.believerPercentage / (float)Country.accuracy).ToString() + " %";
+		believerLabel.GetComponent<TooltipShowable>().message = currentDisplayCountry.CalculateConversionRate() + "%"; 
 		resistenceLabel.text = "Resistence: " + currentDisplayCountry.resistence + " / 100";
 	}
 }

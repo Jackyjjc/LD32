@@ -2,3 +2,5 @@ Temp/
 *.userprefs
 Library/
 ProjectSettings/
+build/
+builds/

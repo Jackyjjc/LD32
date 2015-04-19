@@ -70,6 +70,7 @@ public class GameManger : MonoBehaviour {
 
 	//Update related
 	public Text influencePointText;
+	public GameObject influencePointPanel;
 	private int influencePoint;
 
 	public Text dateText;
@@ -84,15 +85,15 @@ public class GameManger : MonoBehaviour {
 	void SetUpGameActions ()
 	{
 		GameAction[] gameActions = new GameAction[] {
-			new GameAction ("Word Of Mouth", 1, new TimeSpan (30, 0, 0, 0), 0.01f),
-			new GameAction ("Publish Books", 3, new TimeSpan (90, 0, 0, 0), 0.015f),
-			new GameAction ("Social Media", 2, new TimeSpan (8, 0, 0, 0), 0.8f),
-			new GameAction ("TV Shows", 5, new TimeSpan (20, 0, 0, 0), 0.4f),
-			new GameAction ("Public Speech", 4, new TimeSpan (16, 0, 0, 0), 0.3f),
-			new GameAction ("National Tour", 10, new TimeSpan (60, 0, 0, 0), 0.5f, "\nRequire: 1 Celebrity"),
-			new GameAction ("Political Party", 15, new TimeSpan(365, 0, 0, 0), 0.01f, "\nRequire: 1 Political Leader"),
-			new GameAction ("Revolution", 20, new TimeSpan(10, 0, 0, 0), 5f, "\nRequire: 2 Leader of any kind"),
-			new GameAction ("Coup d'état", 30, new TimeSpan(2, 0, 0, 0), 50f, "\nRequire: 1 Political Leader + 1 Military Leader")
+			new GameAction ("Word Of Mouth", 1, new TimeSpan (30, 0, 0, 0), 0.01f, 1),
+			new GameAction ("Publish Books", 3, new TimeSpan (90, 0, 0, 0), 0.015f, 1),
+			new GameAction ("Social Media", 2, new TimeSpan (8, 0, 0, 0), 0.8f, 2),
+			new GameAction ("TV Shows", 5, new TimeSpan (20, 0, 0, 0), 0.4f, 2),
+			new GameAction ("Public Speech", 4, new TimeSpan (16, 0, 0, 0), 0.3f, 5),
+			new GameAction ("National Tour", 10, new TimeSpan (60, 0, 0, 0), 0.5f, 10, "\nRequire: 1 Celebrity"),
+			new GameAction ("Political Party", 15, new TimeSpan(365, 0, 0, 0), 0.01f, 15, "\nRequire: 1 Political Leader"),
+			new GameAction ("Revolution", 20, new TimeSpan(10, 0, 0, 0), 5f, 50, "\nRequire: 2 Leader of any kind"),
+			new GameAction ("Coup d'état", 30, new TimeSpan(2, 0, 0, 0), 50f, 90, "\nRequire: 1 Political Leader + 1 Military Leader")
 		};
 		foreach (var action in gameActions) {
 			var copyAction = action;
@@ -106,7 +107,7 @@ public class GameManger : MonoBehaviour {
 
 	void Start () {
 		currentDate = new DateTime(2015, 4, 18);
-		influencePoint = 100;
+		influencePoint = 10;
 		this.worldMap = GameObject.FindGameObjectWithTag("worldMap").GetComponent<WorldMap>();
 		this.actions = new LinkedList<Action>();
 
@@ -134,7 +135,6 @@ public class GameManger : MonoBehaviour {
 
 		int actionCost = selectedCountry.GetActionCost(gameAction);
 		if(actionCost > influencePoint) {
-			//TODO: NOTIFY user
 			PostMessageToBoard("Insufficient influence point to perform action: " + gameAction.actionName + " in country: " + selectedCountry.name, Color.red);
 			return;
 		}
@@ -144,7 +144,7 @@ public class GameManger : MonoBehaviour {
 		actions.AddLast(delegate(DateTime date) {
 			Debug.Log("Action " + gameAction.actionName + " is picked up in the queue");
 			influencePoint -= actionCost;
-			selectedCountry.AddEffect(new Effect(gameAction.actionName, gameAction.baseRate, date.Add(gameAction.baseDuration)));
+			selectedCountry.AddEffect(new Effect(gameAction.actionName, gameAction.baseRate, date.Add(gameAction.baseDuration), gameAction.resistenceModifier));
 		});
 	}
 
@@ -159,14 +159,24 @@ public class GameManger : MonoBehaviour {
 			timeElapsedSinceLastTick -= tickFrequency;
 		}
 		influencePointText.text = "Influence Points: " + influencePoint;
+		influencePointPanel.GetComponent<TooltipShowable>().message = 
+			"All your actions will consume influence\npoints. Influence Points regenerates over\ntime as the number of your follower\ngrows. (Regenerating: " + influencePointAcc + "%)";
 		dateText.text = currentDate.ToString("dd, MMM, yyyy");
 	}
+
+	private float influencePointAcc = 0;
 
 	void GameUpdate() {
 		currentDate = currentDate.AddDays(1);
 
+		influencePointAcc += worldMap.globalPer;
+		while(influencePointAcc > 100) {
+			influencePoint++;
+			influencePointAcc -= 100;
+		}
+
 		//Clean up message queue
-		List<GameMessage> messagesToRemove = messages.FindAll(x => (currentDate - x.creationDate).TotalDays > 30);
+		List<GameMessage> messagesToRemove = messages.FindAll(x => (currentDate - x.creationDate).TotalDays > messagePreserveDuration);
 		messages.RemoveAll(x => messagesToRemove.Contains(x));
 		foreach(var m in messagesToRemove) {
 			m.messageObj.transform.SetParent(null);
@@ -182,6 +192,7 @@ public class GameManger : MonoBehaviour {
 		worldMap.GameUpdate(currentDate);
 	}
 
+	private static readonly int messagePreserveDuration = 90;
 	private struct GameMessage {
 		public DateTime creationDate;
 		public GameObject messageObj;
