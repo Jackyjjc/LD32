@@ -31,11 +31,13 @@ public class Country {
 	public int resistence = 0;
 	private DateTime nextResistenceCheck;
 	private List<Effect> effects;
+	public List<CountryTrait> traits;
 
-	public Country(string name) {
+	public Country(string name, List<CountryTrait> traits) {
 		this.name = name;
 		this.believerPercentage = 0;
 		this.effects = new List<Effect>();
+		this.traits = traits;
 	}
 
 	public void Update(DateTime currentDate) {
@@ -86,8 +88,24 @@ public class Country {
 
 	public float CalculateConversionRate() {
 		float conversionRate = - Mathf.Max((resistence / 1000.0f), 0.001f);
+		if(PlayerProfile.instance.trait.Equals("Peaceful")) {
+			conversionRate *= 0.80f;
+		} else if (PlayerProfile.instance.trait.Equals("Violent")) {
+			conversionRate *= 1.2f;
+		}
+
 		foreach(var e in effects) {
-			conversionRate += e.modifier;
+			if(e.modifier < 0) {
+				if(PlayerProfile.instance.trait.Equals("Peaceful")) {
+					conversionRate += e.modifier * 0.80f;
+				} else if (PlayerProfile.instance.trait.Equals("Violent")) {
+					conversionRate += e.modifier * 1.2f;
+				} else {
+					conversionRate += e.modifier;
+				}
+			} else {
+				conversionRate += e.modifier;
+			}
 		}
 		return conversionRate;
 	}
@@ -153,14 +171,20 @@ public class Country {
 				string.Format("People in {0} are reluctant to follow {1} because of recent developments", name, PlayerProfile.instance.ideaName), Color.yellow
 				);
 		} else if (level >= 70 && level < 80) {
+			if(traits.Exists(x => x.name.Equals("Freedom"))) {
+				return;
+			}
 			suddenDrop = 1f;
-			AddEffect(new Effect(string.Format("Restrict Access"), -0.1f, currentDate + new TimeSpan(90, 0, 0, 0)));
+			AddEffect(new Effect(string.Format("Restrict Access"), -0.1f, currentDate + new TimeSpan(90, 0, 0, 0) + (traits.Exists(x => x.name.Equals("Dictatorial")) ? new TimeSpan(30 , 0, 0, 0) : new TimeSpan(0 , 0, 0, 0))));
 			GameManger.instance.PostMessageToBoardWithTime(
 				string.Format("Access to materials about {0} are becoming increasingly hard in {1}", PlayerProfile.instance.ideaName, name), Color.yellow
 			);
 		} else if (level >= 80 && level < 90) {
+			if(traits.Exists(x => x.name.Equals("Freedom"))) {
+				return;
+			}
 			suddenDrop = 5f;
-			AddEffect(new Effect(string.Format("Restrict Speech"), -1f, currentDate + new TimeSpan(365, 0, 0, 0)));
+			AddEffect(new Effect(string.Format("Restrict Speech"), -1f, currentDate + new TimeSpan(365, 0, 0, 0)+ (traits.Exists(x => x.name.Equals("Dictatorial")) ? new TimeSpan(30 , 0, 0, 0) : new TimeSpan(0 , 0, 0, 0))));
 			GameManger.instance.PostMessageToBoardWithTime(
 				string.Format("The government of {0} bans all discussions about {1}", name, PlayerProfile.instance.ideaName), Color.yellow
 			);

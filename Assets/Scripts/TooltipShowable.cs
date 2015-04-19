@@ -10,7 +10,7 @@ public class TooltipShowable : MonoBehaviour, IPointerEnterHandler, IPointerExit
 	private bool active = false;
 
 	void Start() {
-		tooltip = GameObject.FindGameObjectWithTag("tooltip");
+		tooltip = (GameManger.instance == null) ? PlayerProfile.instance.tooltip : GameManger.instance.tooltip;
 		message = message.Replace("\\n", "\n");
 	}
 

@@ -90,10 +90,10 @@ public class GameManger : MonoBehaviour {
 			new GameAction ("Social Media", 2, new TimeSpan (8, 0, 0, 0), 0.8f, 2),
 			new GameAction ("TV Shows", 5, new TimeSpan (20, 0, 0, 0), 0.4f, 2),
 			new GameAction ("Public Speech", 4, new TimeSpan (16, 0, 0, 0), 0.3f, 5),
-			new GameAction ("National Tour", 10, new TimeSpan (60, 0, 0, 0), 0.5f, 10, "\nRequire: 1 Celebrity"),
-			new GameAction ("Political Party", 15, new TimeSpan(365, 0, 0, 0), 0.01f, 15, "\nRequire: 1 Political Leader"),
-			new GameAction ("Revolution", 20, new TimeSpan(10, 0, 0, 0), 5f, 50, "\nRequire: 2 Leader of any kind"),
-			new GameAction ("Coup d'état", 30, new TimeSpan(2, 0, 0, 0), 50f, 90, "\nRequire: 1 Political Leader + 1 Military Leader")
+			new GameAction ("National Tour", 10, new TimeSpan (60, 0, 0, 0), 0.5f, 10),
+			new GameAction ("Political Party", 15, new TimeSpan(365, 0, 0, 0), 0.01f, 15),
+			new GameAction ("Revolution", 20, new TimeSpan(10, 0, 0, 0), 5f, 50),
+			new GameAction ("Coup d'état", 30, new TimeSpan(2, 0, 0, 0), 50f, 90)
 		};
 		foreach (var action in gameActions) {
 			var copyAction = action;
@@ -135,6 +135,13 @@ public class GameManger : MonoBehaviour {
 		if(selectedCountry == null) {
 			PostMessageToBoard("Cannot perform action because no country is selected", Color.red);
 			return;
+		} else if (gameAction.actionName.Equals("Coup d'état") && selectedCountry.traits.Exists(x => x.name.Equals("Militaristic"))) {
+			PostMessageToBoard("Cannot perform Coup d'état on a Militaristic country", Color.red);
+		} else if (PlayerProfile.instance.trait.Equals("Peaceful")) {
+			if(gameAction.actionName.Equals("Coup d'état") || gameAction.actionName.Equals("Revolution")) {
+				PostMessageToBoard("Cannot perform violent actions", Color.red);
+				return;
+			}
 		}
 
 		int actionCost = selectedCountry.GetActionCost(gameAction);
@@ -145,14 +152,20 @@ public class GameManger : MonoBehaviour {
 
 		PostMessageToBoardWithTime("You performed action: " + gameAction.actionName);
 
+		TimeSpan bonusDuration = new TimeSpan(0, 0, 0, 0);
+		if(gameAction.actionName.Equals("Publish Books") && selectedCountry.traits.Exists(x => x.name.Equals("Educated"))) {
+			bonusDuration = new TimeSpan(30, 0, 0, 0);
+		}
+
 		actions.AddLast(delegate(DateTime date) {
 			Debug.Log("Action " + gameAction.actionName + " is picked up in the queue");
 			influencePoint -= actionCost;
-			selectedCountry.AddEffect(new Effect(gameAction.actionName, gameAction.baseRate, date.Add(gameAction.baseDuration), gameAction.resistenceModifier));
+			selectedCountry.AddEffect(new Effect(gameAction.actionName, gameAction.baseRate, date.Add(gameAction.baseDuration + bonusDuration), gameAction.resistenceModifier));
 		});
 	}
 
 	public GameObject finalScreen;
+	public GameObject tooltip;
 
 	void Update () {
 		if(!started) {

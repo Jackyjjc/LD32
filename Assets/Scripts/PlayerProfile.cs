@@ -29,10 +29,13 @@ public class PlayerProfile : MonoBehaviour {
 	public InputField ideaNameText;
 	public InputField ideaDescriptionText;
 	public InputField ideaFounderText;
+	public ToggleGroup group;
 
+	public GameObject tooltip;
 	public string founderName;
 	public string ideaName;
 	public string ideaDescription;
+	public string trait;
 
     public void StartGame() {
 		if(ideaNameText.text.Length == 0 || ideaDescriptionText.text.Length == 0 || ideaFounderText.text.Length == 0) {
@@ -57,6 +60,10 @@ public class PlayerProfile : MonoBehaviour {
 		this.ideaFounderText = null;
 		this.ideaNameText = null;
 		this.ideaDescriptionText = null;
+		foreach(var t in group.ActiveToggles()) {
+			this.trait = t.GetComponentInChildren<Text>().text;
+		}
+		Debug.Log (trait);
 
 		Application.LoadLevel("scene");
 	}

@@ -4,6 +4,16 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
+public class CountryTrait {
+	public string name;
+	public string description;
+
+	public CountryTrait(string name, string des) {
+		this.name = name;
+		this.description = des;
+	}
+}
+
 public class WorldMap : MonoBehaviour {
 
 	public Text globalBelieverPercentageText;
@@ -16,20 +26,31 @@ public class WorldMap : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+		List<CountryTrait> traits = new List<CountryTrait>(new CountryTrait[] {
+			new CountryTrait("Freedom", "This country cannot restrict speech or accesses"),
+			new CountryTrait("Militaristic", "Cannot perform 'Coup d'état' on this country"),
+			new CountryTrait("Educated", "Impact of 'Publish Books' last a month longer"),
+			new CountryTrait("Dictatorial", "Impact of 'Restrict Speech' and 'Restrict Access' last a month longer"),
+			/*new CountryTrait("Peace Lover", "Peaceful Ideology actions costs 1 less.\nViolent Ideology actions cost 1 more"),
+			new CountryTrait("Warmonger", "Violent Ideology actions costs 1 less.\nPeaceful Ideology actions cost 1 more"),
+			new CountryTrait("Capitalist", "'National Tour' costs 5 more influence points"),
+			new CountryTrait("Couch Potato", "Effect of 'TV show' last 1 month longer"),*/
+		});
+
 		this.countries = new Country[] {
-			new Country("Russia"),
-			new Country("MiddleEast"),
-			new Country("Mongolia"),
-			new Country("China"),
-			new Country("India"),
-			new Country("SoutheastAsia"),
-			new Country("Europe"),
-			new Country("ANZ"),
-			new Country("EastAsia"),
-			new Country("Africa"),
-			new Country("Greenland"),
-			new Country("NorthAmerica"),
-			new Country("SouthAmerica")
+			new Country("Russia", choose<CountryTrait>(traits, 5)),
+			new Country("MiddleEast", choose<CountryTrait>(traits, UnityEngine.Random.Range(1, traits.Count / 2))),
+			new Country("Mongolia", choose<CountryTrait>(traits, UnityEngine.Random.Range(1, traits.Count / 2))),
+			new Country("China", choose<CountryTrait>(traits, UnityEngine.Random.Range(1, traits.Count / 2))),
+			new Country("India", choose<CountryTrait>(traits, UnityEngine.Random.Range(1, traits.Count / 2))),
+			new Country("SoutheastAsia", choose<CountryTrait>(traits, UnityEngine.Random.Range(1, traits.Count / 2))),
+			new Country("Europe", choose<CountryTrait>(traits, UnityEngine.Random.Range(1, traits.Count / 2))),
+			new Country("ANZ", choose<CountryTrait>(traits, UnityEngine.Random.Range(1, traits.Count / 2))),
+			new Country("EastAsia", choose<CountryTrait>(traits, UnityEngine.Random.Range(1, traits.Count / 2))),
+			new Country("Africa", choose<CountryTrait>(traits,UnityEngine.Random.Range(1, traits.Count / 2))),
+			new Country("Greenland", choose<CountryTrait>(traits, UnityEngine.Random.Range(1, traits.Count / 2))),
+			new Country("NorthAmerica", choose<CountryTrait>(traits, UnityEngine.Random.Range(1, traits.Count / 2))),
+			new Country("SouthAmerica", choose<CountryTrait>(traits, UnityEngine.Random.Range(1, traits.Count / 2)))
 		};
 		
 		this.countryTable = new Dictionary<string, Country>();
@@ -93,5 +114,13 @@ public class WorldMap : MonoBehaviour {
 
 	public bool isFullControl() {
 		return globalPer ==  countries.Length * Country.hundredPer;
+	}
+
+	public List<T> choose<T>(List<T> list, int n) {
+		if(n <= 0 || list.Count <= 0) return new List<T>();
+		T t = list[UnityEngine.Random.Range(0, list.Count)];
+		List<T> results = choose(list.FindAll(x => !x.Equals(t)), n - 1);
+		results.Add(t);
+		return results;
 	}
 }
