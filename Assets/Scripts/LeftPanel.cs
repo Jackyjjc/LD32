@@ -15,12 +15,14 @@ public class LeftPanel : MonoBehaviour, CountrySelectionEventListener {
 	public GameObject traitPrefab;
 
 	public void SelectCountry(Country info) {
+		DeselectCountry();
 		this.currentDisplayCountry = info;
 		foreach(var t in info.traits) {
 			GameObject go = Instantiate(traitPrefab, Vector3.zero, Quaternion.identity) as GameObject;
 			go.GetComponent<Text>().text = t.name;
 			go.GetComponent<TooltipShowable>().message = t.description;
 			go.transform.SetParent(traitPanel.transform);
+			objects.Add(go);
 		}
 	}
 
