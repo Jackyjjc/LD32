@@ -85,7 +85,7 @@ public class Country {
 	}
 
 	public float CalculateConversionRate() {
-		float conversionRate = 0f;
+		float conversionRate = -0.005f;
 		foreach(var e in effects) {
 			conversionRate += e.action.baseRate;
 		}

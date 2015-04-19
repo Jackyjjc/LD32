@@ -34,7 +34,7 @@ public class DebugPanel : MonoBehaviour, CountrySelectionEventListener {
 			List<Text> childrenToRemove = children.GetRange(children.Count - diff, diff);
 			children.RemoveAll(x => childrenToRemove.Contains(x));
 			childrenToRemove.ForEach(x => {
-				x.transform.parent = null;
+				x.transform.SetParent(null);
 				Destroy(x);
 			});
 		}

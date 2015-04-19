@@ -52,6 +52,7 @@
      <Compile Include="Assets\Scripts\GameAction.cs" />
      <Compile Include="Assets\Scripts\GameManger.cs" />
      <Compile Include="Assets\Scripts\LeftPanel.cs" />
+     <Compile Include="Assets\Scripts\PlayerProfile.cs" />
      <Compile Include="Assets\Scripts\TooltipShowable.cs" />
      <Compile Include="Assets\Scripts\WorldMap.cs" />
  <Reference Include="UnityEngine.UI">

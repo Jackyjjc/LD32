@@ -7,6 +7,7 @@ using System.Collections.Generic;
 public class WorldMap : MonoBehaviour {
 
 	public Text globalBelieverPercentageText;
+	private GameObject globalProgressBar;
 	
 	public Country currentSelectedCountry;
 	public Country[] countries;
@@ -19,12 +20,16 @@ public class WorldMap : MonoBehaviour {
 			new Country("MiddleEast"),
 			new Country("Mongolia"),
 			new Country("China"),
+			new Country("India"),
+			new Country("SoutheastAsia")
 		};
 		
 		this.countryTable = new Dictionary<string, Country>();
 		foreach(var info in countries) {
 			countryTable[info.name] = info;
 		}
+
+		globalProgressBar = GameObject.FindGameObjectWithTag("GlobalProgressBar");
 	}
 	
 	// Update is called once per frame
@@ -49,8 +54,11 @@ public class WorldMap : MonoBehaviour {
 			globalPercentage += c.believerPercentage;
 		}
 		float globalPer = (((float)globalPercentage / countries.Length) / 1000f);
-
 		globalBelieverPercentageText.text = globalPer.ToString("0.00") + "%";
+
+		//update the progress bar as well
+		RectTransform rectTransform = globalProgressBar.GetComponent<RectTransform>();
+		rectTransform.sizeDelta = new Vector2(125 * (globalPer / 100), rectTransform.sizeDelta.y);
 	}
 
 	private void SelectCountry(string countryName) {
